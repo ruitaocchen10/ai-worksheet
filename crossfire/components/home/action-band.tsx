@@ -101,7 +101,7 @@ export default function ActionBand() {
                 )}
 
                 <div
-                  className={`relative mt-5 flex items-center gap-1.5 text-[12.5px] font-bold ${ON_FILL[color]}`}
+                  className={`relative mt-auto flex items-center gap-1.5 pt-5 text-[12.5px] font-bold ${ON_FILL[color]}`}
                 >
                   <ClockIcon className="size-4" />
                   {a.due}
