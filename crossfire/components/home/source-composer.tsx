@@ -70,7 +70,7 @@ export default function SourceComposer() {
   return (
     <section
       aria-labelledby="composer-heading"
-      className="mt-8 rounded-lg bg-surface p-5 shadow-[0_2px_10px_rgba(20,20,18,0.05)] nav:p-7"
+      className="mt-3 rounded-lg bg-surface p-5 shadow-[0_2px_10px_rgba(20,20,18,0.05)] nav:p-7"
     >
       <span className="rounded-full bg-accent-soft px-3 py-1.5 font-mono text-[10px] font-medium tracking-[0.12em] text-accent-ink uppercase">
         New debate

@@ -41,17 +41,14 @@ export interface Twist {
    *  it out rather than the composer blocking it — the constraint is yours
    *  to keep, and breaking it should cost you in the round, not in a form. */
   banned?: { label: string; terms: string[] };
-  /** Steelman opens the round with a turn that isn't your own case. */
-  opensWithSteelman?: boolean;
 }
 
 export const TWISTS: Twist[] = [
   {
     key: "steelman",
     name: "Steelman",
-    rule: "State their best case before your own.",
-    short: "You opened with their case, not yours.",
-    opensWithSteelman: true,
+    rule: "Acknowledge their strongest point in your opening claim.",
+    short: "Name their strongest point before making your case.",
   },
   {
     key: "devils-advocate",
@@ -89,7 +86,7 @@ export function dealHand(pool: Twist[] = TWISTS): Twist[] {
 /** Fixed turns rather than a phase timer: round length stays knowable, a
  *  demo can't run long, and a slow opponent never eats the student's clock. */
 export const PHASE_TURNS: Record<Phase, number> = {
-  constructive: 2,
+  constructive: 1,
   "cross-ex": 3,
   rebuttal: 2,
   closing: 1,
@@ -101,7 +98,7 @@ export const PHASE_TURNS: Record<Phase, number> = {
 export const TURN_SECONDS = 90;
 
 export const PHASE_RULE: Record<Phase, string> = {
-  constructive: "Build your case. Every claim attaches to evidence.",
+  constructive: "Make your opening claim, then hear the opposing opening claim.",
   "cross-ex": "You may only ask questions. No assertions.",
   rebuttal: "Answer their arguments. Pick what you're responding to.",
   closing: "Sum up what survived. No new claims, no new evidence.",
@@ -191,12 +188,11 @@ export function uid(prefix: string) {
   return `${prefix}-${idc}`;
 }
 
-/** How many student turns this phase runs. Steelman buys constructive an
- *  extra turn, because stating their case is not stating yours. */
+/** How many student turns this phase runs. Constructive has one opening from
+ *  each side, so it never gets an extra student response. */
 export function turnsInPhase(phase: Phase, setup: DebateSetup) {
-  const base = PHASE_TURNS[phase];
-  if (phase === "constructive" && setup.twist.opensWithSteelman) return base + 1;
-  return base;
+  void setup;
+  return PHASE_TURNS[phase];
 }
 
 export function nextPhase(phase: Phase): Phase | null {

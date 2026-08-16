@@ -201,9 +201,8 @@ export function propositionsFor(source: CustomSource): GeneratedProposition[] {
   return AP_WORLD;
 }
 
-/** A line from the source a student can lean on. The bank is the fast path;
- *  §3's "no evidence, no claim" is enforced against it, but a student may
- *  also bring their own — see EvidenceRef in lib/debate.ts. */
+/** A line from the source a student can lean on. Students may also bring
+ *  their own — see EvidenceRef in lib/debate.ts. */
 export interface Excerpt {
   id: string;
   text: string;

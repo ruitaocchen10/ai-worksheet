@@ -38,54 +38,52 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
   // the turn's start time — no effect, and nothing to reset.
   const [startedAt] = useState(() => Date.now());
 
-  // Steelman spends the first constructive turn on their case rather than
-  // yours — stating their argument is not stating your own, so it mints no
-  // claim and asks for no evidence.
-  const steelmanOwed =
-    phase === "constructive" &&
-    Boolean(setup.twist.opensWithSteelman) &&
-    !turns.some((t) => t.kind === "steelman");
-
   const theirClaims = useMemo(() => claims.filter((c) => c.by === "opponent"), [claims]);
+  const crossExClaim = theirClaims.find((claim) => claim.bornIn === "constructive") ?? theirClaims[0];
 
   // Derived rather than defaulted through an effect: the first of their
   // claims is what you're answering until you say otherwise.
   const activeTarget = target ?? theirClaims[0]?.id ?? null;
 
-  const needsEvidence = !steelmanOwed && (phase === "constructive" || phase === "rebuttal");
-  const kind: TurnKind = steelmanOwed
-    ? "steelman"
-    : phase === "constructive"
-      ? "claim"
-      : phase === "cross-ex"
-        ? "question"
-        : phase === "rebuttal"
-          ? "rebuttal"
-          : "closing";
+  const canAttachEvidence = phase === "constructive";
+  const crossExQuestions = turns.filter(
+    (turn) => turn.by === "you" && turn.phase === "cross-ex" && turn.kind === "question",
+  ).length;
+  const rebuttals = turns.filter(
+    (turn) => turn.by === "you" && turn.phase === "rebuttal" && turn.kind === "rebuttal",
+  ).length;
+  const yourCase = claims.find((claim) => claim.by === "you" && claim.bornIn === "constructive");
+  const opponentCase = claims.find((claim) => claim.by === "opponent" && claim.bornIn === "constructive");
+  const lastRebuttal = turns.filter((turn) => turn.phase === "rebuttal").slice(-1)[0];
+  const kind = phase === "constructive"
+    ? "claim"
+    : phase === "cross-ex"
+      ? "question"
+      : phase === "rebuttal"
+        ? "rebuttal"
+        : "closing";
 
   const config = {
-    steelman: {
-      heading: "Their strongest case",
-      placeholder: "The best version of the other side is…",
-      action: "State it",
-    },
-    claim: { heading: "Your claim", placeholder: "Make a claim…", action: "Send" },
-    question: {
-      heading: "You may only ask",
-      placeholder: "Ask them something…",
-      action: "Ask",
-    },
-    rebuttal: { heading: "Answer them", placeholder: "Respond to what they argued…", action: "Send" },
+    claim: { heading: "Make your opening claim", placeholder: "Make a claim…", action: "Send claim" },
+    question:
+      crossExQuestions === 0
+        ? { heading: "Test their main claim", placeholder: "What assumption or evidence do you want to test?", action: "Ask question" }
+        : crossExQuestions === 1
+          ? { heading: "Press on their answer", placeholder: "What did their answer leave unresolved?", action: "Ask question" }
+          : { heading: "Set up your rebuttal", placeholder: "What question will matter most in your rebuttal?", action: "Ask question" },
+    rebuttal:
+      rebuttals === 0
+        ? { heading: "Answer their strongest argument", placeholder: "Explain why their claim does not hold…", action: "Send rebuttal" }
+        : { heading: "Address their strongest reply", placeholder: "What did their response still miss?", action: "Send rebuttal" },
     closing: {
-      heading: "Sum up what survived",
-      placeholder: "No new claims — what's left standing?",
-      action: "Close",
+      heading: "What survived?",
+      placeholder: "After the strongest objections, what does this debate show?",
+      action: "Deliver closing",
     },
   }[kind];
 
   const ready =
     text.trim().length > 2 &&
-    (!needsEvidence || Boolean(evidence)) &&
     (phase !== "rebuttal" || Boolean(activeTarget)) &&
     !thinking;
 
@@ -106,7 +104,7 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
     onSubmit({
       text: body,
       kind,
-      evidence: needsEvidence && evidence ? evidence : undefined,
+      evidence: evidence ?? undefined,
       targetClaimId: kind === "rebuttal" ? (activeTarget ?? undefined) : undefined,
       elapsedMs: Date.now() - startedAt,
     });
@@ -134,6 +132,24 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
       )}
 
       <div className="mx-auto max-w-none px-4 py-4 nav:px-6">
+        {phase === "closing" && (
+          <aside className="mb-4 rounded-card bg-amber-soft p-3.5" aria-label="Arguments to weigh in closing">
+            <span className="font-mono text-[9px] tracking-[0.14em] text-amber-ink uppercase">What&apos;s on the table</span>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              <p className="text-[12.5px] leading-snug text-ink/80"><span className="font-bold text-ink">Your case · </span>{yourCase?.text ?? "Your constructive claim"}</p>
+              <p className="text-[12.5px] leading-snug text-ink/80"><span className="font-bold text-ink">Opponent case · </span>{opponentCase?.text ?? "Their constructive claim"}</p>
+            </div>
+            {lastRebuttal && <p className="mt-2 border-t border-amber-ink/15 pt-2 text-[12.5px] leading-snug text-ink/80"><span className="font-bold text-ink">Latest rebuttal · </span>{lastRebuttal.text}</p>}
+          </aside>
+        )}
+
+        {phase === "cross-ex" && crossExClaim && (
+          <aside className="mb-4 rounded-card bg-rose-soft p-3.5" aria-label="Opponent claim under examination">
+            <span className="font-mono text-[9px] tracking-[0.14em] text-rose-ink uppercase">Opponent&apos;s claim under examination</span>
+            <p className="mt-1.5 text-[13.5px] leading-snug font-semibold text-ink">{crossExClaim.text}</p>
+          </aside>
+        )}
+
         {phase === "rebuttal" && theirClaims.length > 0 && (
           <fieldset className="mb-3">
             <legend className="mb-2 font-mono text-[9px] tracking-[0.14em] text-muted uppercase">
@@ -212,7 +228,7 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
         )}
 
         <div className="mt-3 flex items-center gap-2">
-          {needsEvidence && (
+          {canAttachEvidence && (
             <button
               type="button"
               onClick={() => setDrawer((v) => !v)}
@@ -239,9 +255,9 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
           <button
             type="button"
             onClick={send}
-            disabled={thinking || (!ready && phase !== "cross-ex")}
+            disabled={thinking || !ready}
             className={`ml-auto inline-flex min-h-11 items-center gap-2 rounded-full px-6 font-display text-[14px] font-bold text-white transition-transform duration-150 ${
-              thinking || (!ready && phase !== "cross-ex")
+              thinking || !ready
                 ? "cursor-not-allowed bg-ink/25"
                 : "cursor-pointer bg-ink hover:-translate-y-0.5"
             }`}
@@ -251,11 +267,6 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
           </button>
         </div>
 
-        {needsEvidence && !evidence && (
-          <p className="mt-2 text-[12px] font-semibold text-muted">
-            No evidence, no claim. Pull a line from the reading or bring your own.
-          </p>
-        )}
       </div>
     </div>
   );

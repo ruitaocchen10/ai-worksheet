@@ -23,6 +23,7 @@ export default function PhaseInterstitial({
 }) {
   const meta = PHASES.find((p) => p.key === phase)!;
   const crossEx = phase === "cross-ex";
+  const completedPhase = phase === "cross-ex" ? "Constructive" : phase === "rebuttal" ? "Cross-examination" : phase === "closing" ? "Rebuttal" : null;
 
   return (
     <div
@@ -35,7 +36,7 @@ export default function PhaseInterstitial({
     >
       <div className="w-full max-w-[440px] rounded-lg bg-surface p-7 text-center">
         <span className="font-mono text-[10px] tracking-[0.14em] text-muted uppercase">
-          Next phase
+          {completedPhase ? `${completedPhase} complete` : "Next phase"}
         </span>
         <h2 id="phase-heading" className="mt-3 font-display text-[34px] leading-none font-extrabold tracking-[-0.02em]">
           {meta.label}

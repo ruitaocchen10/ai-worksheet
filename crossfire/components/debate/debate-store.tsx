@@ -54,6 +54,7 @@ interface DebateContextValue {
   submit(args: SubmitArgs): Promise<void>;
   concede(claimId: string, reason: string): void;
   clearCrossed(): void;
+  beginCrossExamination(): void;
   previewCrossExamination(): void;
   previewRebuttal(): void;
   previewClosing(): void;
@@ -186,14 +187,19 @@ export default function DebateProvider({
       setDebate(mid);
       setThinking(true);
 
-      const reply = await opponent.respond({
-        setup: mid.setup,
-        phase,
-        turnInPhase,
-        studentTurn,
-        claims: mid.claims,
-        bank,
-      });
+      // Constructive contains openings only: one from the student and one
+      // from the opponent. The opponent does not answer the student's claim
+      // until cross-examination begins.
+      const reply = phase === "constructive"
+        ? await opponent.opening({ setup: mid.setup })
+        : await opponent.respond({
+            setup: mid.setup,
+            phase,
+            turnInPhase,
+            studentTurn,
+            claims: mid.claims,
+            bank,
+          });
 
       const opponentTurn: Turn = {
         id: uid("t"),
@@ -211,7 +217,9 @@ export default function DebateProvider({
       // student farm unlimited turns by never citing the reading.
       const spent = reply.rebuke === "rhetorical" ? mid.spent - 1 : mid.spent;
       const exhausted = spent >= turnsInPhase(phase, mid.setup);
-      const after = exhausted ? nextPhase(phase) : null;
+      // The opening exchange is complete, but remains on screen until the
+      // student explicitly begins cross-examination.
+      const after = phase === "constructive" || !exhausted ? null : nextPhase(phase);
 
       setDebate((prev) => {
         if (!prev) return prev;
@@ -234,7 +242,7 @@ export default function DebateProvider({
           claims: claimsAfter,
           phase: after ?? phase,
           spent: after ? 0 : spent,
-          done: exhausted && !after,
+          done: phase !== "constructive" && exhausted && !after,
         };
       });
 
@@ -276,6 +284,16 @@ export default function DebateProvider({
   }, []);
 
   const clearCrossed = useCallback(() => setCrossed(null), []);
+
+  const beginCrossExamination = useCallback(() => {
+    setDebate((prev) => {
+      if (!prev || prev.phase !== "constructive" || prev.spent < turnsInPhase("constructive", prev.setup)) {
+        return prev;
+      }
+      return { ...prev, phase: "cross-ex", spent: 0 };
+    });
+    setCrossed("cross-ex");
+  }, []);
 
   /** Lets the classroom demo move through the round without manufacturing
    *  student turns. Real debates advance through submit() above. */
@@ -336,8 +354,8 @@ export default function DebateProvider({
   }, [router]);
 
   const value = useMemo(
-    () => ({ draft, debate, bank, thinking, crossed, openSetup, begin, submit, concede, clearCrossed, previewCrossExamination, previewRebuttal, previewClosing, previewRoundReview, leave }),
-    [draft, debate, bank, thinking, crossed, openSetup, begin, submit, concede, clearCrossed, previewCrossExamination, previewRebuttal, previewClosing, previewRoundReview, leave],
+    () => ({ draft, debate, bank, thinking, crossed, openSetup, begin, submit, concede, clearCrossed, beginCrossExamination, previewCrossExamination, previewRebuttal, previewClosing, previewRoundReview, leave }),
+    [draft, debate, bank, thinking, crossed, openSetup, begin, submit, concede, clearCrossed, beginCrossExamination, previewCrossExamination, previewRebuttal, previewClosing, previewRoundReview, leave],
   );
 
   return <DebateContext.Provider value={value}>{children}</DebateContext.Provider>;

@@ -32,6 +32,7 @@ export interface OpponentReply {
  * reply — the round never learns which one it is talking to.
  */
 export interface Opponent {
+  opening(ctx: Pick<OpponentContext, "setup">): Promise<OpponentReply>;
   respond(ctx: OpponentContext): Promise<OpponentReply>;
 }
 
@@ -132,6 +133,14 @@ const SCRIPT: Record<Phase, ((ctx: OpponentContext) => OpponentReply)[]> = {
 };
 
 export const scriptedOpponent: Opponent = {
+  async opening({ setup }) {
+    const side = setup.side === "affirmative" ? "negative" : "affirmative";
+    const claim = `The ${side} case is that the motion does not yet carry its burden: the reading can support a different conclusion.`;
+    return {
+      text: `${OPPONENT_VOICE[setup.opponent]} ${claim}`,
+      claim,
+    };
+  },
   async respond(ctx) {
     // Rebukes come first — the move matters more than the argument, and this
     // is where cross-ex's second layer actually lives.

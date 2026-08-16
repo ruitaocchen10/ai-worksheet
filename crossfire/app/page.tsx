@@ -40,7 +40,7 @@ export default function Home() {
             </span>
           </header>
 
-          <div className="max-w-[660px]">
+          <div className="w-full">
             <ActionBand />
             <SourceComposer />
           </div>

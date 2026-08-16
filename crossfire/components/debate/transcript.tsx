@@ -1,10 +1,9 @@
 import type { Claim, EvidenceRef, Turn } from "@/lib/debate";
 
 /**
- * A turn is not a chat bubble — it renders as claim plus attachment, because
- * "no evidence, no claim" has to be visible in the record, not just enforced
- * at the composer. Bank evidence cites; your own says so plainly, so the
- * transcript itself distinguishes a grounded argument from an asserted one.
+ * A turn is not a chat bubble — an optional attachment remains visible in the
+ * record. Bank evidence cites; your own says so plainly, so the transcript
+ * distinguishes a grounded argument from an asserted one.
  */
 export default function Transcript({ turns, claims }: { turns: Turn[]; claims: Claim[] }) {
   return (

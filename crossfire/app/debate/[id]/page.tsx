@@ -20,9 +20,9 @@ import { ArrowRightIcon } from "@/components/ui/icons";
  */
 export default function RoundPage() {
   const router = useRouter();
-  const { debate, bank, thinking, crossed, submit, concede, clearCrossed, previewCrossExamination, previewRebuttal, previewClosing, previewRoundReview, leave } = useDebate();
+  const { debate, bank, thinking, crossed, submit, clearCrossed, beginCrossExamination, leave } = useDebate();
   const [leaving, setLeaving] = useState(false);
-  const [composing, setComposing] = useState(false);
+  const [composing, setComposing] = useState(true);
   const foot = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,24 +33,22 @@ export default function RoundPage() {
     foot.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [debate?.turns.length, debate?.claims.length]);
 
-
   if (!debate) return null;
 
   const { setup, phase, turns, claims, spent, done } = debate;
   const total = turnsInPhase(phase, setup);
   const phaseLabel = PHASES.find((p) => p.key === phase)!.label;
-  const previewReview = () => {
-    previewRoundReview();
-    router.push(`/debate/${debate.id}/review`);
-  };
-
+  const openingsComplete =
+    phase === "constructive" &&
+    spent >= total &&
+    turns.some((turn) => turn.by === "opponent" && turn.phase === "constructive");
   return (
     <div className="flex h-dvh flex-col bg-ground">
       <header className="shrink-0 px-3 pt-3">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-2 rounded-lg bg-surface px-4 py-3 shadow-[0_1px_2px_rgba(20,20,18,0.06)] nav:px-6">
           <PhaseTrack phase={phase} done={done} />
           <div className="ml-auto flex items-center gap-2">
-            {!done && <TurnClock paused={thinking} key={turns.length} />}
+            {!done && <TurnClock paused={thinking || openingsComplete} key={turns.length} />}
             <button
               type="button"
               onClick={() => setLeaving(true)}
@@ -95,7 +93,7 @@ export default function RoundPage() {
             <p className="mt-4 rounded-card bg-ground p-3.5 text-[13.5px] leading-snug font-semibold">
               <span className="text-muted">{phaseLabel} · </span>
               {PHASE_RULE[phase]}
-              {!done && (
+              {!done && !openingsComplete && (
                 <span className="text-muted">
                   {" "}
                   · turn {Math.min(spent + 1, total)} of {total}
@@ -103,34 +101,45 @@ export default function RoundPage() {
               )}
             </p>
 
-            {!composing && <>
-              {phase === "constructive" && turns.length === 0 && <OpeningPreview setup={setup} onNext={previewCrossExamination} />}
-              {phase === "cross-ex" && turns.length === 0 && <CrossExaminationPreview setup={setup} onNext={previewRebuttal} />}
-              {phase === "rebuttal" && turns.length === 0 && <RebuttalPreview setup={setup} onNext={previewClosing} />}
-              {phase === "closing" && turns.length === 0 && <ClosingPreview setup={setup} onNext={previewReview} />}
-
+            {turns.length > 0 && (
               <div className="mt-6">
                 <Transcript turns={turns} claims={claims} />
               </div>
+            )}
 
-              {thinking && (
-                <p aria-live="polite" className="mt-4 text-[13.5px] font-semibold text-muted">
-                  They&rsquo;re thinking…
+            {thinking && (
+              <p aria-live="polite" className="mt-4 text-[13.5px] font-semibold text-muted">
+                They&rsquo;re thinking…
+              </p>
+            )}
+
+            {openingsComplete && (
+              <section className="mt-6 rounded-card bg-amber-soft p-4" aria-label="Opening exchange complete">
+                <span className="font-mono text-[10px] tracking-[0.12em] text-amber-ink uppercase">Opening exchange complete</span>
+                <p className="mt-1.5 text-[13.5px] leading-snug text-ink/75">
+                  Review both opening arguments before you start questioning the opposing case.
                 </p>
-              )}
+                <button
+                  type="button"
+                  onClick={beginCrossExamination}
+                  className="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-ink px-5 font-display text-[13.5px] font-bold text-white hover:-translate-y-0.5"
+                >
+                  Begin cross-examination <ArrowRightIcon className="size-4" />
+                </button>
+              </section>
+            )}
 
-              {!done && (
+            {!done && !composing && !openingsComplete && (
                 <button type="button" onClick={() => setComposing(true)} className="mt-6 inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-ink px-6 font-display text-[14px] font-bold text-white hover:-translate-y-0.5">
                   Write your response <ArrowRightIcon className="size-4" />
                 </button>
-              )}
-            </>}
+            )}
 
-            {done && !composing && (
+            {done && (
               <div className="mt-6 rounded-lg bg-surface p-6 text-center shadow-[0_2px_10px_rgba(20,20,18,0.05)]">
-                <h2 className="font-display text-[22px] font-extrabold">The round is over.</h2>
+                <h2 className="font-display text-[22px] font-extrabold">Round complete.</h2>
                 <p className="mx-auto mt-2 max-w-[36ch] text-[14px] leading-relaxed text-muted">
-                  No winner and no score. What&rsquo;s worth looking at is how you argued.
+                  Your closing is in the record. Review how each argument held up across the round.
                 </p>
                 <button
                   type="button"
@@ -146,16 +155,16 @@ export default function RoundPage() {
             <div ref={foot} />
           </div>
 
-          {!done && (
+          {!done && !openingsComplete && (
             <section className={composing ? "mt-6" : "hidden"} aria-label="Response workspace">
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div>
                   <span className="font-mono text-[10px] tracking-[0.12em] text-muted uppercase">Response workspace</span>
-                  <h2 className="mt-1 font-display text-[22px] font-extrabold">Write your {phase === "cross-ex" ? "question" : "response"}</h2>
+                  <h2 className="mt-1 font-display text-[22px] font-extrabold">{phase === "constructive" ? "Make your opening claim" : phase === "cross-ex" ? spent === 0 ? "Test their main claim" : spent === 1 ? "Press on their answer" : "Set up your rebuttal" : phase === "rebuttal" ? spent === 0 ? "Answer their strongest argument" : "Address their strongest reply" : "Make your closing argument"}</h2>
                 </div>
                 <button type="button" onClick={() => setComposing(false)} className="min-h-10 cursor-pointer rounded-full bg-ground px-4 text-[12.5px] font-bold text-muted hover:text-ink">Back to debate</button>
               </div>
-              <p className="mt-3 text-[13px] leading-snug text-muted">The debate transcript is still available when you are ready to check it again. Your draft stays here until you send it.</p>
+              <p className="mt-3 text-[13px] leading-snug text-muted">{phase === "constructive" ? "State your position. You can attach evidence if it helps, but it is optional." : phase === "cross-ex" ? "Ask a question that tests an assumption, evidence, or consequence. Do not introduce a new argument." : phase === "rebuttal" ? "Choose the opponent claim you are answering, then explain why it does not hold. Evidence is not required in this phase." : "Weigh the arguments that survived. Do not introduce new claims or evidence."}</p>
               <div className="mt-5 rounded-lg bg-ground p-1">
               {/* Keyed by turn: the composer is a fresh instrument each turn, so
                   the clock, the gate message and the draft all reset without an
@@ -170,7 +179,7 @@ export default function RoundPage() {
                 thinking={thinking}
                 onSubmit={(args) => {
                   void submit(args);
-                  setComposing(false);
+                  if (phase === "constructive") setComposing(false);
                 }}
               />
               </div>
@@ -179,8 +188,6 @@ export default function RoundPage() {
         </main>
 
         <OnTheTable
-          claims={claims}
-          onConcede={concede}
           preparation={setup.preparation}
           phase={phase}
           evidence={bank}
@@ -228,6 +235,9 @@ export default function RoundPage() {
   );
 }
 
+/* The remaining phase samples are retained as reference content while their
+   live equivalents are redesigned screen by screen. */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 function OpeningPreview({ setup, onNext }: { setup: DebateSetup; onNext: () => void }) {
   const youAgree = setup.side === "affirmative";
   const yourOpening = youAgree
@@ -251,7 +261,7 @@ function OpeningPreview({ setup, onNext }: { setup: DebateSetup; onNext: () => v
         </article>
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[12.5px] leading-snug text-muted">Sample openings only. Make your own first move below and support it with evidence.</p>
+        <p className="text-[12.5px] leading-snug text-muted">Sample openings only. Make your own first move below; evidence is optional.</p>
         <button type="button" onClick={onNext} className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-bold text-white hover:-translate-y-0.5">
           Preview cross-examination <ArrowRightIcon className="size-3.5" />
         </button>
@@ -365,3 +375,4 @@ function ClosingPreview({ setup, onNext }: { setup: DebateSetup; onNext: () => v
     </section>
   );
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */
