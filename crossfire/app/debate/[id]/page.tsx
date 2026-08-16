@@ -160,11 +160,11 @@ export default function RoundPage() {
               <div className="flex items-center justify-between border-b border-line pb-4">
                 <div>
                   <span className="font-mono text-[10px] tracking-[0.12em] text-muted uppercase">Response workspace</span>
-                  <h2 className="mt-1 font-display text-[22px] font-extrabold">{phase === "constructive" ? "Make your opening claim" : phase === "cross-ex" ? spent === 0 ? "Test their main claim" : spent === 1 ? "Press on their answer" : "Set up your rebuttal" : phase === "rebuttal" ? spent === 0 ? "Answer their strongest argument" : "Address their strongest reply" : "Make your closing argument"}</h2>
+                  <h2 className="mt-1 font-display text-[22px] font-extrabold">{phase === "constructive" ? "Make your opening claim" : phase === "cross-ex" ? "Ask a question" : phase === "rebuttal" ? spent === 0 ? "Answer their strongest argument" : "Address their strongest reply" : "Make your closing argument"}</h2>
                 </div>
                 <button type="button" onClick={() => setComposing(false)} className="min-h-10 cursor-pointer rounded-full bg-ground px-4 text-[12.5px] font-bold text-muted hover:text-ink">Back to debate</button>
               </div>
-              <p className="mt-3 text-[13px] leading-snug text-muted">{phase === "constructive" ? "State your position. You can attach evidence if it helps, but it is optional." : phase === "cross-ex" ? "Ask a question that tests an assumption, evidence, or consequence. Do not introduce a new argument." : phase === "rebuttal" ? "Choose the opponent claim you are answering, then explain why it does not hold. Evidence is not required in this phase." : "Weigh the arguments that survived. Do not introduce new claims or evidence."}</p>
+              <p className="mt-3 text-[13px] leading-snug text-muted">{phase === "constructive" ? "State your position. You can attach evidence if it helps, but it is optional." : phase === "cross-ex" ? "Ask any question about the debate. You have three questions; do not introduce a new argument." : phase === "rebuttal" ? "Choose the opponent claim you are answering, then explain why it does not hold. Evidence is not required in this phase." : "Weigh the arguments that survived. Do not introduce new claims or evidence."}</p>
               <div className="mt-5 rounded-lg bg-ground p-1">
               {/* Keyed by turn: the composer is a fresh instrument each turn, so
                   the clock, the gate message and the draft all reset without an

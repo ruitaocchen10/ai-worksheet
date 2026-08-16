@@ -39,16 +39,12 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
   const [startedAt] = useState(() => Date.now());
 
   const theirClaims = useMemo(() => claims.filter((c) => c.by === "opponent"), [claims]);
-  const crossExClaim = theirClaims.find((claim) => claim.bornIn === "constructive") ?? theirClaims[0];
 
   // Derived rather than defaulted through an effect: the first of their
   // claims is what you're answering until you say otherwise.
   const activeTarget = target ?? theirClaims[0]?.id ?? null;
 
   const canAttachEvidence = phase === "constructive";
-  const crossExQuestions = turns.filter(
-    (turn) => turn.by === "you" && turn.phase === "cross-ex" && turn.kind === "question",
-  ).length;
   const rebuttals = turns.filter(
     (turn) => turn.by === "you" && turn.phase === "rebuttal" && turn.kind === "rebuttal",
   ).length;
@@ -65,12 +61,7 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
 
   const config = {
     claim: { heading: "Make your opening claim", placeholder: "Make a claim…", action: "Send claim" },
-    question:
-      crossExQuestions === 0
-        ? { heading: "Test their main claim", placeholder: "What assumption or evidence do you want to test?", action: "Ask question" }
-        : crossExQuestions === 1
-          ? { heading: "Press on their answer", placeholder: "What did their answer leave unresolved?", action: "Ask question" }
-          : { heading: "Set up your rebuttal", placeholder: "What question will matter most in your rebuttal?", action: "Ask question" },
+    question: { heading: "Ask a question", placeholder: "Ask anything about the debate…", action: "Ask question" },
     rebuttal:
       rebuttals === 0
         ? { heading: "Answer their strongest argument", placeholder: "Explain why their claim does not hold…", action: "Send rebuttal" }
@@ -140,13 +131,6 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
               <p className="text-[12.5px] leading-snug text-ink/80"><span className="font-bold text-ink">Opponent case · </span>{opponentCase?.text ?? "Their constructive claim"}</p>
             </div>
             {lastRebuttal && <p className="mt-2 border-t border-amber-ink/15 pt-2 text-[12.5px] leading-snug text-ink/80"><span className="font-bold text-ink">Latest rebuttal · </span>{lastRebuttal.text}</p>}
-          </aside>
-        )}
-
-        {phase === "cross-ex" && crossExClaim && (
-          <aside className="mb-4 rounded-card bg-rose-soft p-3.5" aria-label="Opponent claim under examination">
-            <span className="font-mono text-[9px] tracking-[0.14em] text-rose-ink uppercase">Opponent&apos;s claim under examination</span>
-            <p className="mt-1.5 text-[13.5px] leading-snug font-semibold text-ink">{crossExClaim.text}</p>
           </aside>
         )}
 
