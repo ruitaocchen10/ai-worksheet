@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useDebate } from "@/components/debate/debate-store";
 import { ClockIcon, MicIcon, PlayIcon, ArrowRightIcon } from "@/components/ui/icons";
 import { CHIP, FILL, LIFT, ON_FILL } from "@/lib/class-color";
-import type { Assignment, ClassRef } from "@/lib/data";
+import { propositionsFor, type Assignment, type ClassRef, type GeneratedProposition } from "@/lib/data";
 
 type ClassHomeProps = {
   classroom: ClassRef;
@@ -17,8 +18,10 @@ const unitFor = (classId: string) =>
  * same material voluntarily. Its activity is intentionally not a gradebook. */
 export default function ClassHome({ classroom, assignments }: ClassHomeProps) {
   const { openSetup } = useDebate();
+  const [choosingPractice, setChoosingPractice] = useState(false);
   const next = assignments.find((assignment) => assignment.progress === "in-round") ?? assignments[0];
   const unit = unitFor(classroom.id);
+  const practicePropositions = propositionsFor({ kind: "class", label: classroom.name, detail: unit });
 
   function start(assignment: Assignment, graded = assignment.voice) {
     openSetup({
@@ -33,6 +36,16 @@ export default function ClassHome({ classroom, assignments }: ClassHomeProps) {
             ? "The Grande Armée advanced over a supply line that stretched farther with every mile, while Russian forces refused the decisive battle Napoleon needed."
             : "Use the class material to build a claim and test it against the opposing case.",
       },
+      belief: "affirmative",
+    });
+  }
+
+  function startPractice(proposition: GeneratedProposition) {
+    openSetup({
+      origin: "study",
+      graded: false,
+      source: { kind: "class", label: classroom.name, detail: unit },
+      proposition,
       belief: "affirmative",
     });
   }
@@ -102,7 +115,7 @@ export default function ClassHome({ classroom, assignments }: ClassHomeProps) {
             </div>
             {assignments.length > 0 ? (
               <ul className="mt-3 space-y-2">
-                {assignments.map((assignment) => (
+                {assignments.filter((assignment) => assignment.id !== next?.id).map((assignment) => (
                   <li key={assignment.id}>
                     <button
                       type="button"
@@ -124,24 +137,40 @@ export default function ClassHome({ classroom, assignments }: ClassHomeProps) {
             ) : (
               <p className="mt-3 rounded-card bg-surface p-4 text-[14px] text-muted">Your teacher has not assigned a debate this week.</p>
             )}
+            {assignments.length === 1 && (
+              <p className="mt-3 text-[13px] font-semibold text-muted">Your next debate is featured above.</p>
+            )}
           </section>
 
           <section className="mt-8 grid gap-3 nav:grid-cols-[1.25fr_0.75fr]">
             <div className="rounded-lg bg-slate p-5 text-slate-text">
               <span className="font-mono text-[10px] tracking-[0.12em] text-slate-muted uppercase">Practice from class material</span>
               <h2 className="mt-2 font-display text-[20px] font-extrabold">Make a case when nothing&rsquo;s on the line.</h2>
-              <p className="mt-2 max-w-[40ch] text-[13px] leading-relaxed text-slate-muted">Pick a proposition from {unit} and argue it in text. Practice does not affect an assignment.</p>
-              {next && (
-                <button type="button" onClick={() => start(next, false)} className="mt-5 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-amber px-5 text-[13px] font-bold text-ink hover:-translate-y-0.5">
-                  Practice a debate <ArrowRightIcon className="size-4" />
-                </button>
+              <p className="mt-2 max-w-[40ch] text-[13px] leading-relaxed text-slate-muted">Choose a proposition from {unit} and argue it in text. Practice does not affect an assignment.</p>
+              <button type="button" onClick={() => setChoosingPractice((open) => !open)} aria-expanded={choosingPractice} className="mt-5 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-amber px-5 text-[13px] font-bold text-ink hover:-translate-y-0.5">
+                {choosingPractice ? "Hide practice propositions" : "Choose a practice proposition"} <ArrowRightIcon className="size-4" />
+              </button>
+              {choosingPractice && (
+                <ul className="mt-4 space-y-2">
+                  {practicePropositions.map((proposition) => (
+                    <li key={proposition.id}>
+                      <button type="button" onClick={() => startPractice(proposition)} className="w-full cursor-pointer rounded-inner bg-white/10 p-3 text-left text-[12.5px] leading-snug font-bold hover:bg-white/20">
+                        {proposition.text}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
             <div className="rounded-lg bg-surface p-5 shadow-[0_1px_2px_rgba(20,20,18,0.06)]">
               <span className="font-mono text-[10px] tracking-[0.12em] text-muted uppercase">Class pulse</span>
               <p className="mt-3 font-display text-[18px] leading-snug font-extrabold">Most challenged idea</p>
               <p className="mt-1 text-[13px] leading-snug text-muted">Russian strategy did more than winter alone.</p>
-              <span className="mt-4 block text-[12px] font-bold text-accent-ink">18 classmates debated this unit</span>
+              <ul className="mt-4 space-y-1.5 text-[12px] font-bold text-accent-ink">
+                <li>18 classmates debated this unit</li>
+                <li>11 supported a claim with evidence</li>
+                <li>6 revised a claim after challenge</li>
+              </ul>
             </div>
           </section>
         </div>
