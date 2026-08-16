@@ -52,7 +52,7 @@ export default function ActionBand() {
           return (
             <li
               key={a.id}
-              className="w-[80%] shrink-0 snap-start sm:w-auto sm:min-w-[248px] sm:flex-1"
+              className="w-[80%] shrink-0 snap-start sm:w-[360px]"
             >
               <button
                 type="button"
