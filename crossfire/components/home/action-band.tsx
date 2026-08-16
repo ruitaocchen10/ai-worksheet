@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { assignments, classes, type Progress } from "@/lib/data";
-import { FILL, LIFT, ON_FILL } from "./class-color";
-import { MicIcon, ClockIcon, PlayIcon, CheckIcon } from "./icons";
+import { FILL, LIFT, ON_FILL } from "@/lib/class-color";
+import { MicIcon, ClockIcon, PlayIcon, CheckIcon } from "@/components/ui/icons";
 
 /** State, not percentage. A debate is untouched, mid-round, or done —
  *  "62% complete" would measure artifact production, which is the proxy

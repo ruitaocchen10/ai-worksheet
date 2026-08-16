@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HomeIcon, ClassesIcon } from "./icons";
+import { HomeIcon, ClassesIcon } from "@/components/ui/icons";
 
 const TABS = [
   { href: "/", label: "Home", Icon: HomeIcon, current: true },

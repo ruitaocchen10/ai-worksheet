@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { profile, lastRound } from "@/lib/data";
-import FlowSheet from "./flow-sheet";
-import LedgerStrip from "./ledger-strip";
-import StatTiles from "./stat-tiles";
-import { ArrowRightIcon } from "./icons";
+import FlowSheet from "@/components/reasoning/flow-sheet";
+import LedgerStrip from "@/components/reasoning/ledger-strip";
+import StatTiles from "@/components/reasoning/stat-tiles";
+import { ArrowRightIcon } from "@/components/ui/icons";
 
 /**
  * The reasoning profile — a mirror, not a score. No leaderboard and no

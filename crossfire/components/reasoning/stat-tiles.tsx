@@ -1,5 +1,5 @@
 import { profile } from "@/lib/data";
-import { ExtendedMark, ConcededMark, DroppedMark, ChangedMark } from "./mark-icons";
+import { ExtendedMark, ConcededMark, DroppedMark, ChangedMark } from "@/components/reasoning/mark-icons";
 
 /** Capsule tiles with an icon disc on top — the reference's stat row. Ours
  *  counts reasoning moves rather than lessons completed, which is the whole

@@ -1,9 +1,9 @@
-import Sidebar from "@/components/sidebar";
-import MobileTabs from "@/components/mobile-tabs";
-import ActionBand from "@/components/action-band";
-import PropositionHero from "@/components/proposition-hero";
-import UploadRow from "@/components/upload-row";
-import Rail from "@/components/rail";
+import Sidebar from "@/components/shell/sidebar";
+import MobileTabs from "@/components/shell/mobile-tabs";
+import ActionBand from "@/components/home/action-band";
+import PropositionHero from "@/components/home/proposition-hero";
+import UploadRow from "@/components/home/upload-row";
+import Rail from "@/components/reasoning/rail";
 
 /**
  * Home is not a hub you choose a mode from — it's the surface you start

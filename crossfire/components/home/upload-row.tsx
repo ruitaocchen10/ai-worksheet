@@ -1,4 +1,4 @@
-import { UploadIcon } from "./icons";
+import { UploadIcon } from "@/components/ui/icons";
 
 /** Students upload too, not just teachers — it's what makes the home page
  *  work for someone with no class at all, which is the case that actually

@@ -1,6 +1,6 @@
 import { featured } from "@/lib/data";
-import SidePicker from "./side-picker";
-import { ShuffleIcon } from "./icons";
+import SidePicker from "@/components/home/side-picker";
+import { ShuffleIcon } from "@/components/ui/icons";
 
 /**
  * One proposition, two doors. Not a grid of twelve — a wall of options is a

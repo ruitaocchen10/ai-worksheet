@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { classes } from "@/lib/data";
-import { DOT } from "./class-color";
-import { HomeIcon } from "./icons";
-import SchoolTheme from "./school-theme";
+import { DOT } from "@/lib/class-color";
+import { HomeIcon } from "@/components/ui/icons";
+import SchoolTheme from "@/components/school-theme/school-theme";
 
 /** Classes are enumerated rather than hidden behind an index page — they're
  *  one click from anywhere, which is what makes the class layer feel present
