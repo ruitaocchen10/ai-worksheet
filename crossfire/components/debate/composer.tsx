@@ -119,7 +119,7 @@ export default function Composer({ phase, setup, turns, claims, bank, thinking, 
   }
 
   return (
-    <div className="rounded-t-lg border-t border-line bg-surface shadow-[0_-2px_10px_rgba(20,20,18,0.05)]">
+    <div className="rounded-lg border-t border-line bg-surface shadow-[0_-2px_10px_rgba(20,20,18,0.05)]">
       {drawer && (
         <EvidenceDrawer
           bank={bank}
