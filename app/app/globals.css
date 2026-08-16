@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- neutral ground -------------------------------------------------- */
+  --color-ground: #f2f2f0;
+  --color-surface: #ffffff;
+  --color-ink: #141412;
+  --color-muted: #5c5e58;        /* 5.86:1 on ground — AA */
+  --color-line: #e4e4e0;
+  --color-line-soft: #eeeeea;
+
+  /* ---- the family -----------------------------------------------------
+     Bright fills carry ink; dark fills carry white. Every fill below is
+     paired with the text colour that clears 4.5:1 on it — no exceptions,
+     which is why rose takes ink rather than the white in the reference
+     (5.71:1 against 3.23:1). */
+  --color-rose: #e4667f;
+  --color-rose-soft: #f9dfe4;
+  --color-rose-ink: #b03350;
+
+  --color-amber: #efa83b;
+  --color-amber-soft: #fceed4;
+  --color-amber-ink: #8a5a0e;
+
+  --color-forest: #2e6b5e;
+  --color-forest-soft: #dceae4;
+  --color-forest-ink: #26594e;
+
+  --color-sage: #b6bf80;
+  --color-sage-soft: #e9eecb;
+  --color-sage-ink: #5f6b33;
+
+  /* ---- the one austere object ------------------------------------------
+     Everything here is round and bright except the flow sheet, which stays
+     a precision instrument. */
+  --color-slate: #141412;
+  --color-slate-line: #2e2e2a;
+  --color-slate-text: #f3f2ee;
+  --color-slate-muted: #a6a69e;
+  --color-slate-faint: #6e6e66;
+
+  /* ---- type ------------------------------------------------------------ */
+  --font-display: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-martian-mono), ui-monospace, monospace;
+  --font-source: var(--font-newsreader), ui-serif, Georgia, serif;
+
+  /* ---- shape ----------------------------------------------------------- */
+  --radius-card: 24px;
+  --radius-lg: 30px;
+  --radius-inner: 16px;
+
+  /* ---- layout ---------------------------------------------------------- */
+  --breakpoint-nav: 900px;
+  --breakpoint-rail: 1200px;
+}
+
+/* The one token a school overrides. Family colours stay fixed — they
+   identify classes and states, which is meaning rather than branding. */
+:root {
+  --accent: #2e6b5e;
+  --accent-soft: #dceae4;
+  --accent-ink: #26594e;
+}
+[data-school="rose"] { --accent: #c43f5b; --accent-soft: #f9dfe4; --accent-ink: #b03350; }
+[data-school="amber"] { --accent: #a06a10; --accent-soft: #fceed4; --accent-ink: #8a5a0e; }
+[data-school="indigo"] { --accent: #3a4a8c; --accent-soft: #e1e4f4; --accent-ink: #32407a; }
+[data-school="plum"] { --accent: #7a3f80; --accent-soft: #f1e3f3; --accent-ink: #6b3670; }
+
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+}
+
+body {
+  background: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Chunky buttons carry depth as a hard offset — a blur at this size reads
+   as haze rather than weight. */
+.depth {
+  box-shadow: 0 4px 0 var(--depth-color);
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+.depth:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--depth-color);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.on-slate :focus-visible { outline-color: #efa83b; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .depth:active { transform: none; }
+}
