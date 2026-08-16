@@ -107,3 +107,99 @@ body {
   }
   .depth:active { transform: none; }
 }
+
+/* ---- collapsible nav ---------------------------------------------------
+   Width is a variable so the panel and everything in it resolve from one
+   number. The default is width-derived: below 1200 the reasoning rail is
+   about to claim a column, so the nav gives space back before the user has
+   to ask for it. A stored preference, once there is one, wins at every
+   width. */
+:root { --nav-w: 76px; }
+@media (min-width: 1200px) { :root { --nav-w: 244px; } }
+[data-nav="collapsed"] { --nav-w: 76px; }
+[data-nav="expanded"] { --nav-w: 244px; }
+
+/* Contents key off the panel's own width rather than re-testing all three
+   conditions above. One query, one source of truth. */
+.nav-panel {
+  width: var(--nav-w);
+  container-type: inline-size;
+  transition: width 200ms ease-out;
+}
+
+/* Collapsed the panel is short enough not to scroll, and it must not clip
+   the labels, which sit outside it as tooltips. Expanded it scrolls. */
+.nav-panel { overflow: visible; }
+@media (min-width: 1200px) { .nav-panel { overflow-y: auto; } }
+[data-nav="collapsed"] .nav-panel { overflow: visible; }
+[data-nav="expanded"] .nav-panel { overflow-y: auto; }
+
+@container (max-width: 120px) {
+  /* The toggle takes the mark's place rather than stacking under it, so
+     every row below keeps the vertical position it had expanded. */
+  .nav-brand { padding-inline: 0; }
+  .nav-logo, .nav-wordmark { display: none; }
+  /* Matches the mark it replaces, so the brand row keeps its height. */
+  .nav-toggle { margin-inline: auto; width: 36px; height: 36px; }
+  .nav-chevron { transform: rotate(180deg); }
+
+  /* The heading keeps its text for screen readers and becomes a rule for
+     everyone else — "CLASSES" does not fit in 76px at any honest size. */
+  /* 24 + 1 + 24 is the height the heading occupies expanded, so the class
+     rows below land on the same baseline in both states. */
+  .nav-section {
+    height: 1px;
+    margin: 24px 14px;
+    padding: 0;
+    overflow: hidden;
+    text-indent: -9999px;
+    background: var(--color-line);
+  }
+
+  .nav-item {
+    position: relative;
+    width: 44px;
+    margin-inline: auto;
+    padding-inline: 0;
+    justify-content: center;
+  }
+
+  /* The label is the accessible name and the tooltip both — hidden by
+     opacity rather than display so it stays in the accessibility tree. */
+  .nav-label {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    z-index: 50;
+    transform: translateY(-50%);
+    border-radius: 10px;
+    background: var(--color-ink);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease-out;
+  }
+  .nav-item:hover .nav-label,
+  .nav-item:focus-visible .nav-label { opacity: 1; }
+
+  .nav-badge {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    min-width: 17px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 17px;
+    box-shadow: 0 0 0 2px var(--color-surface);
+  }
+
+  .nav-disc { width: 30px; height: 30px; font-size: 11px; }
+
+  .nav-theme { display: none; }
+  .nav-user { justify-content: center; padding-inline: 0; }
+  .nav-user-name { display: none; }
+}

@@ -1,21 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-type Side = "affirmative" | "negative";
+import { useDebate } from "@/components/debate/debate-store";
+import type { CustomSource, GeneratedProposition } from "@/lib/data";
+import type { Side } from "@/lib/debate";
 
 /**
- * Side first, twist card after. The constraint should land as a surprise,
- * not as another menu to browse.
+ * These buttons say "I agree" and "I disagree", so what they capture is what
+ * the student actually believes — not which side they'll argue. The two come
+ * apart when the twist is Devil's advocate, and keeping them apart is what
+ * lets the review page say you argued against your own position.
+ *
+ * The choice goes into the store rather than the URL: an uploaded file has no
+ * URL representation, and this object is the future POST /debates body.
  */
-export default function SidePicker({ propositionId }: { propositionId: string }) {
+export default function SidePicker({
+  source,
+  proposition,
+}: {
+  source: CustomSource;
+  proposition: GeneratedProposition;
+}) {
   const [picked, setPicked] = useState<Side | null>(null);
-  const router = useRouter();
+  const { openSetup } = useDebate();
 
-  function choose(side: Side) {
-    setPicked(side);
-    router.push(`/debate/new?proposition=${propositionId}&side=${side}`);
+  function choose(belief: Side) {
+    setPicked(belief);
+    openSetup({ origin: "study", graded: false, source, proposition, belief });
   }
 
   return (
@@ -33,7 +44,7 @@ export default function SidePicker({ propositionId }: { propositionId: string })
           onClick={() => choose(side)}
           style={{ ["--depth-color" as string]: depth }}
           className={`depth flex-1 cursor-pointer rounded-card px-4 py-4 ${fill} ${
-            picked === side ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""
+            picked === side ? "outline-2 outline-offset-2 outline-ink" : ""
           }`}
         >
           <span className="block font-display text-[20px] leading-tight font-bold">{label}</span>

@@ -98,3 +98,37 @@ export function CheckIcon({ className }: Props) {
     </svg>
   );
 }
+
+export function LinkIcon({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M8.5 11.5a3 3 0 0 0 4.24 0l2.5-2.5a3 3 0 0 0-4.24-4.24l-1 1" />
+      <path d="M11.5 8.5a3 3 0 0 0-4.24 0l-2.5 2.5a3 3 0 0 0 4.24 4.24l1-1" />
+    </svg>
+  );
+}
+
+export function TextIcon({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 4h12M4 8h12M4 12h8M4 16h5" />
+    </svg>
+  );
+}
+
+export function DocIcon({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M11.5 2.5H6a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6l-3.5-3.5Z" />
+      <path d="M11.5 2.5V6H15" />
+    </svg>
+  );
+}
+
+export function ChevronLeftIcon({ className }: Props) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M12 5 7 10l5 5" />
+    </svg>
+  );
+}
